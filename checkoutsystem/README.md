@@ -84,10 +84,10 @@ func addProduct(code, name string, price float64) {
 		panic(err)
 	}
 }
-
+```
 We can also add new item in to the database and include the corresponding billing logic to show the appropriate values in the bill
 generation process.
-```
+
 **Scalability:**
 In the future, if the number of products gets increased, we can horizontally scale the database across the cluster. Additionally, we can also enhance the reliability by creating secondary databases.
 
@@ -108,7 +108,7 @@ The above structure is used to keep track of the current count of the purchased 
 ```sh
 Run Setup Script
 $ ./setup
-check the created image by looking for the specified tag. Additionally, it will also starts Mongo server container.
+Check the created images. Additionally, it will also starts Mongo server container.
 $ docker images
 Finally run the below to get in to the app container.
 $ sudo docker run --link mongod  -it --name cos market /bin/bash
