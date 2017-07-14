@@ -71,20 +71,25 @@ type BillFormat struct {
 When the user request to print the bill for display, all the offer specifications are called in a **polymorphic way** to see its availability depending on the items purchased. Finally, the bill gets generated with all the applicable deduction depending on the items purchased.
 
 ##### Product Package design
-This package is used for maintaining the product inventory. In this code, the products specification are maintained in a **map** container for simplicity. The products are added to the map through the below function:
+This package is used for maintaining the product inventory. In this code, the product specification are maintained in a **NoSQL database - Mongo DB**. The products are added to the database through the below function:
 ```
 func addProduct(code, name string, price float64) {
-	item := new(PSchema)
-	item.ProductCode = code
+  item := new(PSchema)
+	item.Code = code
 	item.Name = name
 	item.Price = price
-	Products[code] = item
+
+	err := productCollection.Insert(item)
+	if err != nil {
+		panic(err)
+	}
 }
+
+We can also add new item in to the database and include the corresponding billing logic to show the appropriate values in the bill
+generation process.
 ```
 **Scalability:**
-In the future, if the number of products gets increased, we can use NoSQL database. Only minor code modification is needed in this design.
-  - just add connection logic in the package initialization.
-  - addProduct and deleteProduct method need to be re-written.
+In the future, if the number of products gets increased, we can horizontally scale the database across the cluster. Additionally, we can also enhance the reliability by creating secondary databases.
 
 ##### Basket Package design
 Basket package is used to keep track of purchased item at any given time. The format used to maintain is shown below:
@@ -97,15 +102,16 @@ type Container struct {
 The above structure is used to keep track of the current count of the purchased products. From this structure, the checkout system manages to generate the bill with corresponding offer deduction.
 
 ### Steps to run the project
-Container Initialization: ( Required file: Dockerfile )
- - Copy the Dockerfile in an empty directory and run the below command
+ - Clone this repository in your local system.
+ - Make sure the docker engine is installed before runnin the setup script.
+ - Finally, run the setup shell script to create images and containers.
 ```sh
-Image creation
-$ docker build -t <tag> .
-check the created image by looking for the specified tag
+Run Setup Script
+$ ./setup
+check the created image by looking for the specified tag. Additionally, it will also starts Mongo server container.
 $ docker images
-start and log into the container in an interactive mode
-$ docker run -it <tag> /bin/bash
+Finally run the below to get in to the app container.
+$ sudo docker run --link mongod  -it --name cos market /bin/bash
 ```
 Inside the container, start running the project by typing the below command.
   - Type **market** command in the container terminal.
@@ -117,7 +123,8 @@ $ market
 1. Insert new item into the basket
 2. Show register
 3. Clear Basket
-4. Exit
+4. Product DB configuration
+5. Exit
 Enter the Choice:
 <enter the required choice from the menu displayed above> On pressing 1
 
@@ -134,7 +141,8 @@ Enter the Product Code to add it in Basket:
 1. Insert new item into the basket
 2. Show register
 3. Clear Basket
-4. Exit
+4. Product DB configuration
+5. Exit
 Enter the Choice:2 (to show the current register status)
 
 Farmers Market Bill
@@ -148,7 +156,8 @@ Total	       	3.110000
 1. Insert new item into the basket
 2. Show register
 3. Clear Basket
-4. Exit
+4. Product DB configuration
+5. Exit
 ```
 
 Menu option provides:
