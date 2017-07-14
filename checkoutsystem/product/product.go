@@ -10,7 +10,7 @@ import (
 )
 
 func getDbSession() *mgo.Session {
-	sess, err := mgo.Dial("127.0.0.1:27017")
+	sess, err := mgo.Dial("mongod:27017")
 	if err != nil {
 		panic(err)
 	}
